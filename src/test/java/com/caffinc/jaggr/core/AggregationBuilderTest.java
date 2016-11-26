@@ -181,4 +181,25 @@ public class AggregationBuilderTest {
         Set<Map<String, Object>> result = roughen(aggregation.aggregate(jsonList), HashSet.class);
         assertEquals("Counts without grouping should be as expected", expected, result);
     }
+
+    @Test
+    public void testMultiOperation() throws Exception {
+        String field = "f";
+        String avgField = "test.f";
+        String sumField = "test.f";
+        String minField = "test.f";
+        String maxField = "test.f";
+        Set<Map<String, Object>> expected = new HashSet<>(JsonFileReader.readJsonFromResource("multiResult.json"));
+
+        Aggregation aggregation = new AggregationBuilder()
+                .setGroupBy(field)
+                .addOperation("avg", new AverageOperation(avgField))
+                .addOperation("sum", new SumOperation(sumField))
+                .addOperation("min", new MinOperation(minField))
+                .addOperation("max", new MaxOperation(maxField))
+                .addOperation("count", new CountOperation())
+                .getAggregation();
+        Set<Map<String, Object>> result = roughen(aggregation.aggregate(jsonList), HashSet.class);
+        assertEquals("Multiple aggregations result should be as expected", expected, result);
+    }
 }
