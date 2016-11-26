@@ -1,2 +1,2 @@
 # jaggr
-Simple JSON Aggregator in Java
+Simple JSON Aggregator for Java
