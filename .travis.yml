@@ -1,0 +1,3 @@
+# Test
+script:
+ - sh -c 'cd jaggr && mvn clean test'
