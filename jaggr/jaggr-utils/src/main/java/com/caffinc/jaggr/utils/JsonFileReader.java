@@ -27,7 +27,7 @@ public class JsonFileReader {
      * @return List of JSON lines from the file
      * @throws IOException thrown if there is a problem accessing the file
      */
-    public static List<Map<String, Object>> readJsonFromResource(String resourceName) throws IOException {
+    public static List<Map<String, Object>> readJsonFromResource(final String resourceName) throws IOException {
         List<Map<String, Object>> jsonList = new ArrayList<>();
         String json;
         try (BufferedReader br = new BufferedReader(
@@ -46,7 +46,7 @@ public class JsonFileReader {
      * @return List of JSON lines from the file
      * @throws IOException thrown if there is a problem accessing the file
      */
-    public static List<Map<String, Object>> readJsonFromFile(String fileName) throws IOException {
+    public static List<Map<String, Object>> readJsonFromFile(final String fileName) throws IOException {
         List<Map<String, Object>> jsonList = new ArrayList<>();
         for (String json : getFileLines(fileName)) {
             jsonList.add(gson.fromJson(json, HashMap.class));
@@ -61,7 +61,7 @@ public class JsonFileReader {
      * @return List of lines from the file
      * @throws IOException thrown if there is a problem accessing the file
      */
-    public static List<String> getFileLines(String fileName) throws IOException {
+    public static List<String> getFileLines(final String fileName) throws IOException {
         List<String> text = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
