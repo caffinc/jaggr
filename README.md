@@ -45,6 +45,10 @@ Aggregation can now be performed using the `aggregate()` method:
 
 	List<Map<String, Object>> result = aggregation.aggregate(jsonList);
 
+Aggregation also supports Iterators:
+
+	List<Map<String, Object>> result = aggregation.aggregate(jsonList.iterator());
+
 The result of the above aggregation would look as follows:
 
 	{"_id": "a", "avg": 2.0, "sum": 10, "min": -1, "max": 5, "count": 5}
