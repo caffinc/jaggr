@@ -207,15 +207,27 @@ public class AggregationBuilderTest {
     public void testCollectStrings() throws Exception {
         String field = "test.f";
         String collectField = "f";
-        Set<Map<String, Object>> expected = new HashSet<>(JsonFileReader.readJsonFromResource("collectStringsResult.json"));
+        Map<String, Object> expectedMap1 = new HashMap<>();
+        Map<String, Object> expectedMap2 = new HashMap<>();
+        for (Map<String, Object> expectedObject : JsonFileReader.readJsonFromResource("collectStringsResult.json")) {
+            expectedMap1.put(String.valueOf(expectedObject.get("_id")), new HashSet((List) expectedObject.get("set")));
+            expectedMap2.put(String.valueOf(expectedObject.get("_id")), expectedObject.get("list"));
+        }
 
         Aggregation aggregation = new AggregationBuilder()
                 .setGroupBy(field)
                 .addOperation("list", new CollectOperation(collectField))
                 .addOperation("set", new CollectSetOperation(collectField))
                 .getAggregation();
-        Set<Map<String, Object>> result = roughen(aggregation.aggregate(jsonList), HashSet.class);
-        assertEquals("Collect for Strings should work as expected", expected, result);
+        Map<String, Object> resultMap1 = new HashMap<>();
+        Map<String, Object> resultMap2 = new HashMap<>();
+        for (Map<String, Object> resultObject : (Set<Map<String, Object>>) roughen(aggregation.aggregate(jsonList), HashSet.class)) {
+            resultMap1.put(String.valueOf(resultObject.get("_id")), new HashSet((List) resultObject.get("set")));
+            resultMap2.put(String.valueOf(resultObject.get("_id")), resultObject.get("list"));
+        }
+
+        assertEquals("Collect for Strings should work as expected", expectedMap1, resultMap1);
+        assertEquals("CollectSet for Strings should work as expected", expectedMap2, resultMap2);
     }
 
 
@@ -396,14 +408,26 @@ public class AggregationBuilderTest {
     public void testIterativeCollectStrings() throws Exception {
         String field = "test.f";
         String collectField = "f";
-        Set<Map<String, Object>> expected = new HashSet<>(JsonFileReader.readJsonFromResource("collectStringsResult.json"));
+        Map<String, Object> expectedMap1 = new HashMap<>();
+        Map<String, Object> expectedMap2 = new HashMap<>();
+        for (Map<String, Object> expectedObject : JsonFileReader.readJsonFromResource("collectStringsResult.json")) {
+            expectedMap1.put(String.valueOf(expectedObject.get("_id")), new HashSet((List) expectedObject.get("set")));
+            expectedMap2.put(String.valueOf(expectedObject.get("_id")), expectedObject.get("list"));
+        }
 
         Aggregation aggregation = new AggregationBuilder()
                 .setGroupBy(field)
                 .addOperation("list", new CollectOperation(collectField))
                 .addOperation("set", new CollectSetOperation(collectField))
                 .getAggregation();
-        Set<Map<String, Object>> result = roughen(aggregation.aggregate(jsonList.iterator()), HashSet.class);
-        assertEquals("Collect for Strings should work as expected", expected, result);
+        Map<String, Object> resultMap1 = new HashMap<>();
+        Map<String, Object> resultMap2 = new HashMap<>();
+        for (Map<String, Object> resultObject : (Set<Map<String, Object>>) roughen(aggregation.aggregate(jsonList.iterator()), HashSet.class)) {
+            resultMap1.put(String.valueOf(resultObject.get("_id")), new HashSet((List) resultObject.get("set")));
+            resultMap2.put(String.valueOf(resultObject.get("_id")), resultObject.get("list"));
+        }
+
+        assertEquals("Collect for Strings should work as expected", expectedMap1, resultMap1);
+        assertEquals("CollectSet for Strings should work as expected", expectedMap2, resultMap2);
     }
 }
