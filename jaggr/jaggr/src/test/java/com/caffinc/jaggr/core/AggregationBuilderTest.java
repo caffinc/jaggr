@@ -2,7 +2,7 @@ package com.caffinc.jaggr.core;
 
 import com.caffinc.jaggr.core.operations.*;
 import com.caffinc.jaggr.core.utils.FieldValueExtractor;
-import com.caffinc.jaggr.core.utils.JsonFileReader;
+import com.caffinc.jaggr.utils.JsonFileReader;
 import com.google.gson.Gson;
 import org.junit.BeforeClass;
 import org.junit.Test;
