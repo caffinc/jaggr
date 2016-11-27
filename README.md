@@ -10,7 +10,13 @@ jaggr is on Bintray and Maven Central (Soon):
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr</artifactId>
-	    <version>0.2</version>
+	    <version>0.2.2</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>com.caffinc</groupId>
+	    <artifactId>jaggr-utils</artifactId>
+	    <version>0.2.2</version>
 	</dependency>
 
 Assume the following JSON documents are stored in a file called `raw.json`:
@@ -26,7 +32,7 @@ Assume the following JSON documents are stored in a file called `raw.json`:
 	{"_id": 9, "f": "b", "test": {"f": 1}}
 	{"_id": 10, "f": "b", "test": {"f": 1}}
 
-Read it in using the built in JsonFileReader using:
+Read it in using the `JsonFileReader` in the `jaggr-utils` module using:
 
 	List<Map<String, Object>> jsonList = JsonFileReader.readJsonFromFile("raw.json");
 
@@ -49,6 +55,8 @@ Aggregation also supports Iterators:
 
 	List<Map<String, Object>> result = aggregation.aggregate(jsonList.iterator());
 
+Aggregation actually works with any `Iterable<Map<String, Object>>` too.
+
 The result of the above aggregation would look as follows:
 
 	{"_id": "a", "avg": 2.0, "sum": 10, "min": -1, "max": 5, "count": 5}
@@ -56,23 +64,34 @@ The result of the above aggregation would look as follows:
 
 ## Tests
 
-There are extensive tests for each of the aggregations which can be checked out in the [https://github.com/caffinc/jaggr/blob/master/jaggr/src/test/java/com/caffinc/jaggr/core/AggregationBuilderTest.java](https://github.com/caffinc/jaggr/blob/master/jaggr/src/test/java/com/caffinc/jaggr/core/AggregationBuilderTest.java "AggregationBuilderTest") file.
+There are extensive tests for each of the aggregations which can be checked out in the [https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr/src/test](https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr/src/test "jaggr tests") file.
+
+There are tests for the jaggr-utils module in [https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr-utils/src/test](https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr-utils/src/test "jaggr-utils tests")
 
 ## Dependencies
 
 These are not absolute, but are current (probably) as of 26th November, 2016. It should be trivial to upgrade or downgrade versions as required.
+
+Both `jaggr` and `jaggr-utils` depend on `junit` for tests:
+
+	<dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+
+`jaggr` does not have any other external dependencies, but has a test dependency on `jaggr-utils`.
+
+`jaggr-utils` has the following dependencies:
 
 	<dependencies>
     	<dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
         </dependency>
 	</dependencies>
 
