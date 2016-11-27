@@ -40,12 +40,12 @@ public class Aggregation {
     }
 
     /**
-     * Aggregates over a list of JSON Objects
+     * Aggregates over an iterable list of JSON Objects
      *
-     * @param objectList JSON Object list
+     * @param objectList Iterable list of JSON Objects
      * @return aggregation result
      */
-    public List<Map<String, Object>> aggregate(List<Map<String, Object>> objectList) {
+    public List<Map<String, Object>> aggregate(Iterable<Map<String, Object>> objectList) {
         Map<String, Map<String, Object>> workspace = new HashMap<>();
         if (objectList != null) {
             for (Map<String, Object> object : objectList) {
