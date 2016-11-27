@@ -10,7 +10,7 @@ jaggr is on Bintray and Maven Central (Soon):
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr</artifactId>
-	    <version>0.1</version>
+	    <version>0.2</version>
 	</dependency>
 
 Assume the following JSON documents are stored in a file called `raw.json`:

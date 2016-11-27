@@ -6,7 +6,7 @@
 
     <groupId>com.caffinc</groupId>
     <artifactId>jaggr</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <name>jaggr</name>
     <description>Simple JSON Aggregator for Java</description>
     <url>https://github.com/caffinc/jaggr</url>
