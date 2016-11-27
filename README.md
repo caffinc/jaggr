@@ -62,6 +62,18 @@ The result of the above aggregation would look as follows:
 	{"_id": "a", "avg": 2.0, "sum": 10, "min": -1, "max": 5, "count": 5}
 	{"_id": "b", "avg": 1.0, "sum": 5, "min": 1, "max": 1, "count": 5}
 
+## Supported Aggregations
+
+`jaggr` provides the following aggregations:
+
+1. Count
+2. Sum
+3. Minimum
+4. Maximum
+5. Average
+6. Collect as List
+7. Collect as Set
+
 ## Tests
 
 There are extensive tests for each of the aggregations which can be checked out in the [https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr/src/test](https://github.com/caffinc/jaggr/blob/master/jaggr/jaggr/src/test "jaggr tests") file.
