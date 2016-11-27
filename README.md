@@ -10,7 +10,7 @@ jaggr is on Bintray and Maven Central (Soon):
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr</artifactId>
-	    <version>0.1</version>
+	    <version>0.2</version>
 	</dependency>
 
 Assume the following JSON documents are stored in a file called `raw.json`:
@@ -44,6 +44,10 @@ Now various aggregations can be defined using the `AggregationBuilder`:
 Aggregation can now be performed using the `aggregate()` method:
 
 	List<Map<String, Object>> result = aggregation.aggregate(jsonList);
+
+Aggregation also supports Iterators:
+
+	List<Map<String, Object>> result = aggregation.aggregate(jsonList.iterator());
 
 The result of the above aggregation would look as follows:
 
