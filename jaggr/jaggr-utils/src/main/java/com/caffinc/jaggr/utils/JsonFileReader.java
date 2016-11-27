@@ -1,4 +1,4 @@
-package com.caffinc.jaggr.core.utils;
+package com.caffinc.jaggr.utils;
 
 import com.google.gson.Gson;
 
