@@ -12,13 +12,13 @@ jaggr is on Bintray and Maven Central (Soon):
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr</artifactId>
-	    <version>0.2.2</version>
+	    <version>0.4.0</version>
 	</dependency>
 
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr-utils</artifactId>
-	    <version>0.2.2</version>
+	    <version>0.4.0</version>
 	</dependency>
 
 ### Aggregating documents
@@ -93,7 +93,7 @@ The `JsonStringIterator` class provides constructors to iterate through a JSON f
 
 	List<Map<String, Object>> result = aggregation.aggregate(iterator);
 
-#### Aggregate arbitrary object Iterators
+#### Aggregating arbitrary object Iterators
 
 The `JsonIterator` abstract class provides a way to convert an `Iterator` from any type to JSON. This can be used to iterate through data coming from arbitrary databases. For example, `MongoDB` provides `Iterable` interfaces to the data. You could aggregate an entire collection as follows:
 
@@ -106,7 +106,50 @@ The `JsonIterator` abstract class provides a way to convert an `Iterator` from a
     };
 
 	List<Map<String, Object>> result = aggregation.aggregate(iterator);
-        
+
+#### Aggregating batches of data
+
+Starting with version `0.4.0`, `jaggr` supports aggregation of batches of data in a new class called `BatchAggregation`. The following example shows `BatchAggregation` in action:
+
+Input Data:
+
+	{"_id": 1, "f": "a"}
+	{"_id": 2, "f": "a"}
+	{"_id": 3, "f": "a"}
+	{"_id": 4, "f": "a"}
+	{"_id": 5, "f": "a"}
+	{"_id": 6, "f": "b"}
+	{"_id": 7, "f": "b"}
+	{"_id": 8, "f": "b"}
+	{"_id": 9, "f": "b"}
+	{"_id": 10, "f": "b"}
+
+Aggregation:
+
+    BatchAggregation aggregation = new AggregationBuilder()
+                .setGroupBy("f")
+                .addOperation("count", new CountOperation())
+                .getBatchAggregation();
+
+	aggregation.aggregateBatch(jsonData);
+	List<Map<String, Object>> result = aggregation.getFinalResult();
+
+Result:
+
+	[
+		{"_id":"b","count":5},
+		{"_id":"a","count":5}
+	]
+
+The `aggregateBatch()` method can be called several times with more data. It can also be chained. 
+
+	result = aggregation
+				.aggregateBatch(batch1)
+				.aggregateBatch(batch2)
+				.getFinalResult();
+
+However the `getFinalResult()` method must be called just once to get the final result of the aggregation, after which the `BatchAggregation` object is reset. It can then be used to aggregate fresh batches of data.
+
 
 ## Supported Aggregations
 
