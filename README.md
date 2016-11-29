@@ -5,6 +5,8 @@ Simple JSON Aggregator for Java
 ![Travis-CI Build Status](https://travis-ci.org/caffinc/jaggr.svg?branch=master)
 
 ## Usage
+
+### Adding dependency
 jaggr is on Bintray and Maven Central (Soon):
 
 	<dependency>
@@ -19,6 +21,7 @@ jaggr is on Bintray and Maven Central (Soon):
 	    <version>0.2.2</version>
 	</dependency>
 
+### Aggregating documents
 Assume the following JSON documents are stored in a file called `raw.json`:
 
 	{"_id": 1, "f": "a", "test": {"f": 3}}
@@ -61,6 +64,49 @@ The result of the above aggregation would look as follows:
 
 	{"_id": "a", "avg": 2.0, "sum": 10, "min": -1, "max": 5, "count": 5}
 	{"_id": "b", "avg": 1.0, "sum": 5, "min": 1, "max": 1, "count": 5}
+
+### Aggregating other data sources
+
+While aggregating files or Lists of JSON documents might be good for some use cases, not all data fits this paradigm.
+
+There are three utilities in the `jaggr-utils` library which can be used to aggregate other sources of data.
+
+#### Aggregating small JSON files in the file system or resources
+
+The `JsonFileReader` class exposes the `readJsonFromFile` and `readJsonFromResource` methods which can be used to read in all the JSON objects from the file into memory for aggregation.
+
+It is generally not a good idea to read in large files due to obvious reasons.
+
+    List<Map<String, Object>> jsonData = JsonFileReader.readJsonFromFile("afile.json");
+
+    List<Map<String, Object>> jsonData = JsonFileReader.readJsonFromResource("aFileInResources.json");
+
+	List<Map<String, Object>> result = aggregation.aggregate(iterator);
+
+#### Aggregating large JSON files or readers
+
+The `JsonStringIterator` class provides constructors to iterate through a JSON file or a `Reader` object pointing to an underlying JSON String source without loading all the data into memory.
+
+    Iterator<Map<String, Object>> iterator = new JsonStringIterator("afile.json");
+
+	Iterator<Map<String, Object>> iterator = new JsonStringIterator(new BufferedReader(new FileReader("afile.json")));
+
+	List<Map<String, Object>> result = aggregation.aggregate(iterator);
+
+#### Aggregate arbitrary object Iterators
+
+The `JsonIterator` abstract class provides a way to convert an `Iterator` from any type to JSON. This can be used to iterate through data coming from arbitrary databases. For example, `MongoDB` provides `Iterable` interfaces to the data. You could aggregate an entire collection as follows:
+
+
+    Iterator<Map<String, Object>> iterator = new JsonIterator<DBObject>(mongoCollection.find().iterator()) {
+        @Override
+        public Map<String, Object> toJson(DBObject element) {
+            return element.toMap();
+        }
+    };
+
+	List<Map<String, Object>> result = aggregation.aggregate(iterator);
+        
 
 ## Supported Aggregations
 

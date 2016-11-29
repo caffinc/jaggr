@@ -7,10 +7,11 @@
     <groupId>com.caffinc</groupId>
     <artifactId>jaggr-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
     <modules>
         <module>jaggr-utils</module>
         <module>jaggr</module>
+        <module>jaggr-bench</module>
     </modules>
     <name>jaggr Parent</name>
     <description>Simple JSON Aggregator for Java</description>
@@ -42,7 +43,19 @@
         <gson-version>2.6.2</gson-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
