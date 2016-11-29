@@ -28,15 +28,13 @@ public class Aggregation {
      * @param objectIterator JSON Object iterator
      * @return aggregation result
      */
-    public List<Map<String, Object>> aggregate(Iterator<Map<String, Object>> objectIterator) {
-        Map<String, Map<String, Object>> workspace = new HashMap<>();
-        if (objectIterator != null) {
-            while (objectIterator.hasNext()) {
-                Map<String, Object> object = objectIterator.next();
-                aggregate(object, workspace);
+    public List<Map<String, Object>> aggregate(final Iterator<Map<String, Object>> objectIterator) {
+        return aggregate(new Iterable<Map<String, Object>>() {
+            @Override
+            public Iterator<Map<String, Object>> iterator() {
+                return objectIterator;
             }
-        }
-        return computeResults(workspace);
+        });
     }
 
     /**
@@ -45,7 +43,7 @@ public class Aggregation {
      * @param objectList Iterable list of JSON Objects
      * @return aggregation result
      */
-    public List<Map<String, Object>> aggregate(Iterable<Map<String, Object>> objectList) {
+    public List<Map<String, Object>> aggregate(final Iterable<Map<String, Object>> objectList) {
         Map<String, Map<String, Object>> workspace = new HashMap<>();
         if (objectList != null) {
             for (Map<String, Object> object : objectList) {

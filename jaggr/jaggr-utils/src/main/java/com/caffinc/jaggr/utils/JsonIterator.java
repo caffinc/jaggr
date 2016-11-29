@@ -1,123 +1,52 @@
 package com.caffinc.jaggr.utils;
 
-import com.google.gson.Gson;
-
-import java.io.*;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Iterates a JSON file
+ * Converts any Iterator into a JSON Iterator for <code>jaggr</code>
  *
  * @author Sriram
- * @since 11/27/2016
+ * @since 11/28/2016
  */
-public class JsonIterator implements Iterator<Map<String, Object>>, Closeable {
-    private final BufferedReader bufferedReader;
-    private String cachedLine;
-    private boolean finished = false;
-    private Gson gson = new Gson();
+public abstract class JsonIterator<T> implements Iterator<Map<String, Object>> {
+    private Iterator<T> iterator;
 
     /**
-     * Constructs an iterator of the lines for a <code>fileName</code>.
+     * Constructs an iterator wrapper of the objects in the passed <code>Iterator</code>.
      *
-     * @param fileName the <code>fileName</code> to read from
-     * @throws IOException thrown if there is a problem accessing the file
-     */
-    public JsonIterator(final String fileName) throws IOException {
-        this(new BufferedReader(new FileReader(fileName)));
-    }
-
-    /**
-     * Constructs an iterator of the lines for a <code>Reader</code>.
-     *
-     * @param reader the <code>Reader</code> to read from, not null
+     * @param iterator the underlying <code>Iterator</code> to read from, not null
      * @throws IllegalArgumentException if the reader is null
      */
-    public JsonIterator(final Reader reader) throws IllegalArgumentException {
-        if (reader == null) {
-            throw new IllegalArgumentException("Reader must not be null");
-        }
-        if (reader instanceof BufferedReader) {
-            bufferedReader = (BufferedReader) reader;
-        } else {
-            bufferedReader = new BufferedReader(reader);
-        }
+    public JsonIterator(Iterator<T> iterator) {
+        if (iterator == null)
+            throw new IllegalArgumentException("Iterator must not be null");
+        this.iterator = iterator;
     }
 
     /**
-     * Indicates whether the <code>Reader</code> has more lines.
-     * If there is an <code>IOException</code> then {@link #close()} will
-     * be called on this instance.
+     * Indicates whether the underlying <code>Iterator</code> has more objects
      *
-     * @return {@code true} if the Reader has more lines
-     * @throws IllegalStateException if an IO exception occurs
+     * @return {@code true} if the Iterator has more objects
      */
+    @Override
     public boolean hasNext() {
-        if (cachedLine != null) {
-            return true;
-        } else if (finished) {
-            return false;
-        } else {
-            try {
-                while (true) {
-                    final String line = bufferedReader.readLine();
-                    if (line == null) {
-                        finished = true;
-                        return false;
-                    }
-                    cachedLine = line;
-                    return true;
-                }
-            } catch (final IOException ioe) {
-                close();
-                throw new IllegalStateException(ioe);
-            }
-        }
+        return iterator.hasNext();
     }
 
     /**
-     * Returns the next object in the file or wrapped <code>Reader</code>.
+     * Returns the next object in the wrapped <code>Iterator</code>.
      *
      * @return the next JSON object from the input
      * @throws NoSuchElementException if there is no object to return
      */
+    @Override
     public Map<String, Object> next() {
-        return nextObject();
-    }
-
-    /**
-     * Returns the next object in the file or wrapped <code>Reader</code>.
-     *
-     * @return the next JSON object from the input
-     * @throws NoSuchElementException if there is no object to return
-     */
-    public Map<String, Object> nextObject() {
         if (!hasNext()) {
             throw new NoSuchElementException("No more objects");
         }
-        final String currentLine = cachedLine;
-        cachedLine = null;
-        return gson.fromJson(currentLine, HashMap.class);
-    }
-
-    /**
-     * Closes the underlying <code>Reader</code> quietly.
-     * This method is useful if you only want to process the first few
-     * lines of a larger file. If you do not close the iterator
-     * then the <code>Reader</code> remains open.
-     * This method can safely be called multiple times.
-     */
-    public void close() {
-        finished = true;
-        try {
-            bufferedReader.close();
-        } catch (final IOException ioe) {
-            // ignore
-        }
-        cachedLine = null;
+        return toJson(iterator.next());
     }
 
     /**
@@ -126,7 +55,9 @@ public class JsonIterator implements Iterator<Map<String, Object>>, Closeable {
      * @throws UnsupportedOperationException always
      */
     public void remove() {
-        throw new UnsupportedOperationException("Remove unsupported on JsonIterator");
+        throw new UnsupportedOperationException("Remove unsupported on JsonStringIterator");
     }
 
+
+    public abstract Map<String, Object> toJson(T element);
 }

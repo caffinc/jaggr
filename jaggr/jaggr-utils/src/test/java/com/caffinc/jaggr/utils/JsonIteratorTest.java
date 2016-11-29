@@ -4,47 +4,48 @@ import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
  * Tests for the JsonIterator
  *
  * @author Sriram
- * @since 11/27/2016
+ * @since 11/28/2016
  */
 public class JsonIteratorTest {
-    private static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
-    private static final Random RANDOM = new Random();
-    private static final Gson GSON = new Gson();
-
     @Test
-    public void testJsonFileIterator() throws Exception {
-        Path tempFilePath = Paths.get(TEMP_DIR, "jsontest" + RANDOM.nextInt() + ".json");
-        try {
-            List<Map<String, Object>> expectedData = new ArrayList<>();
-            try (BufferedWriter br = new BufferedWriter(new FileWriter(tempFilePath.toFile()))
-            ) {
-                for (int i = 0; i < 10; i++) {
-                    Map<String, Object> json = new HashMap<>();
-                    json.put("_id", (double) i);
-                    json.put("val", RANDOM.nextDouble());
-                    expectedData.add(json);
-                    br.write(GSON.toJson(json) + "\n");
-                }
+    public void testIterator() {
+        List<String> stringList = Arrays.asList(
+                "{\"i\": 0}",
+                "{\"i\": 1}",
+                "{\"i\": 2}",
+                "{\"i\": 3}",
+                "{\"i\": 4}",
+                "{\"i\": 5}",
+                "{\"i\": 6}",
+                "{\"i\": 7}",
+                "{\"i\": 8}",
+                "{\"i\": 9}"
+        );
+        final JsonIterator jsonIterator = new JsonIterator<String>(stringList.iterator()) {
+            private Gson gson = new Gson();
+
+            @Override
+            public Map<String, Object> toJson(String element) {
+                return gson.fromJson(element, HashMap.class);
             }
-            try (JsonIterator jsonIterator = new JsonIterator(tempFilePath.toString())) {
-                for (Map<String, Object> expected : expectedData) {
-                    Map<String, Object> actual = jsonIterator.next();
-                    Assert.assertEquals("Value should match value written to file", expected, actual);
-                }
+        };
+        Iterable<Map<String, Object>> iterable = new Iterable<Map<String, Object>>() {
+            @Override
+            public Iterator<Map<String, Object>> iterator() {
+                return jsonIterator;
             }
-        } finally {
-            Files.delete(tempFilePath);
+        };
+        int size = 0;
+        for (Map<String, Object> obj : iterable) {
+            Assert.assertEquals("Value must match the input", (double) size, obj.get("i"));
+            size++;
         }
+        Assert.assertEquals("Number of values should match input", stringList.size(), size);
     }
 }
