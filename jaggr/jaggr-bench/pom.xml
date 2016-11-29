@@ -18,9 +18,14 @@
             <version>1.7.21</version>
         </dependency>
         <dependency>
-            <groupId>com.caffinc</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>jaggr</artifactId>
-            <version>0.3.0</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jaggr-utils</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>

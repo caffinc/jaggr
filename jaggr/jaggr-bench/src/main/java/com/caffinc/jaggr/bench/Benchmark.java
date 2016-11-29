@@ -3,6 +3,7 @@ package com.caffinc.jaggr.bench;
 import com.caffinc.jaggr.core.Aggregation;
 import com.caffinc.jaggr.core.AggregationBuilder;
 import com.caffinc.jaggr.core.operations.CollectSetOperation;
+import com.caffinc.jaggr.utils.JsonIterator;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -37,25 +38,10 @@ public class Benchmark {
         long startTime;
         LOG.info("Computing read time");
         startTime = System.currentTimeMillis();
-        Iterator<Map<String, Object>> dbObjectIterator = new Iterator<Map<String, Object>>() {
-            private Iterator<DBObject> objectIterator = BENCHMARK_COLLECTION.find().iterator();
-
+        Iterator<Map<String, Object>> dbObjectIterator = new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().iterator()) {
             @Override
-            public boolean hasNext() {
-                return objectIterator.hasNext();
-            }
-
-            @Override
-            public Map<String, Object> next() {
-                if (objectIterator.hasNext())
-                    return objectIterator.next().toMap();
-                else
-                    return null;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
+            public Map<String, Object> toJson(DBObject element) {
+                return element.toMap();
             }
         };
         List<Map<String, Object>> inMemList = new ArrayList<>();
@@ -66,25 +52,10 @@ public class Benchmark {
 
         LOG.info("Starting aggregation");
         startTime = System.currentTimeMillis();
-        List<Map<String, Object>> result = aggregation.aggregate(new Iterator<Map<String, Object>>() {
-            private Iterator<DBObject> objectIterator = BENCHMARK_COLLECTION.find().iterator();
-
+        List<Map<String, Object>> result = aggregation.aggregate(new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().iterator()) {
             @Override
-            public boolean hasNext() {
-                return objectIterator.hasNext();
-            }
-
-            @Override
-            public Map<String, Object> next() {
-                if (objectIterator.hasNext())
-                    return objectIterator.next().toMap();
-                else
-                    return null;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
+            public Map<String, Object> toJson(DBObject element) {
+                return element.toMap();
             }
         });
         LOG.info("Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
@@ -122,10 +93,11 @@ public class Benchmark {
                 }
             }.start();
         }
-        while(counter.get() < docCount) {
+        while (counter.get() < docCount) {
             Thread.sleep(1);
         }
         LOG.info("Multi-threaded Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
+
     }
 
     private static void runAggregation(final AtomicInteger counter, final Aggregation aggregation, final int limit, final int batchId) {
