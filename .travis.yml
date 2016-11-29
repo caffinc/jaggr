@@ -1,3 +1,4 @@
 # Test
+language: java
 script:
  - sh -c 'cd jaggr && mvn clean test'
