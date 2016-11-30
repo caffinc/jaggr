@@ -1,7 +1,7 @@
 package com.caffinc.jaggr.core;
 
 import com.caffinc.jaggr.core.operations.CountOperation;
-import com.caffinc.jaggr.utils.JsonFileReader;
+import com.caffinc.jaggr.utils.JsonFileUtil;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class BatchAggregationTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        jsonData.addAll(JsonFileReader.readJsonFromResource("raw.json"));
+        jsonData.addAll(JsonFileUtil.readJsonFromResource("raw.json"));
     }
 
     @Test

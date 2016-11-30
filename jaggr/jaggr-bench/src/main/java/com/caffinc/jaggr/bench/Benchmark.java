@@ -2,17 +2,19 @@ package com.caffinc.jaggr.bench;
 
 import com.caffinc.jaggr.core.Aggregation;
 import com.caffinc.jaggr.core.AggregationBuilder;
-import com.caffinc.jaggr.core.operations.CollectSetOperation;
+import com.caffinc.jaggr.core.operations.AverageOperation;
+import com.caffinc.jaggr.core.operations.CountOperation;
+import com.caffinc.jaggr.core.operations.StdDevPopOperation;
+import com.caffinc.jaggr.core.operations.SumOperation;
+import com.caffinc.jaggr.utils.JsonFileIterator;
 import com.caffinc.jaggr.utils.JsonIterator;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
+import com.google.gson.Gson;
+import com.mongodb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author srira
@@ -30,29 +32,35 @@ public class Benchmark {
                     "STRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRINGSTRING";
 
     public static void main(String[] args) throws Exception {
-//        generateDocuments(BENCHMARK_COLLECTION, 1000000, getFieldDefinitions());
+//        generateDocuments(BENCHMARK_COLLECTION, 10000000, getFieldDefinitions());
         final Aggregation aggregation = new AggregationBuilder()
-                .setGroupBy("name")
-                .addOperation("groupedIds", new CollectSetOperation("_id"))
+//                .setGroupBy("name")
+//                .addOperation("groupedIds", new CollectSetOperation("_id"))
+                .addOperation("sum", new SumOperation("appeal"))
+                .addOperation("avg", new AverageOperation("age"))
+                .addOperation("count", new CountOperation())
+                .addOperation("stddev", new StdDevPopOperation("age"))
                 .getAggregation();
         long startTime;
-        LOG.info("Computing read time");
-        startTime = System.currentTimeMillis();
-        Iterator<Map<String, Object>> dbObjectIterator = new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().iterator()) {
-            @Override
-            public Map<String, Object> toJson(DBObject element) {
-                return element.toMap();
-            }
-        };
-        List<Map<String, Object>> inMemList = new ArrayList<>();
-        while (dbObjectIterator.hasNext()) {
-            inMemList.add(dbObjectIterator.next());
-        }
-        LOG.info("Read time: {}ms {} docs", (System.currentTimeMillis() - startTime), inMemList.size());
+        List<Map<String, Object>> result;
 
-        LOG.info("Starting aggregation");
+//        LOG.info("Computing read time");
+//        startTime = System.currentTimeMillis();
+//        Iterator<Map<String, Object>> dbObjectIterator = new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().iterator()) {
+//            @Override
+//            public Map<String, Object> toJson(DBObject element) {
+//                return element.toMap();
+//            }
+//        };
+//        List<Map<String, Object>> inMemList = new ArrayList<>();
+//        while (dbObjectIterator.hasNext()) {
+//            inMemList.add(dbObjectIterator.next());
+//        }
+//        LOG.info("Read time: {}ms {} docs", (System.currentTimeMillis() - startTime), inMemList.size());
+
+        LOG.info("Starting Mongo Cursor aggregation");
         startTime = System.currentTimeMillis();
-        List<Map<String, Object>> result = aggregation.aggregate(new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().iterator()) {
+        result = aggregation.aggregate(new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find()) {
             @Override
             public Map<String, Object> toJson(DBObject element) {
                 return element.toMap();
@@ -60,69 +68,86 @@ public class Benchmark {
         });
         LOG.info("Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
 
-        startTime = System.currentTimeMillis();
+        LOG.info("Result: " + new Gson().toJson(result));
+
+
+//        LOG.info("Starting in-memory aggregation");
+//        startTime = System.currentTimeMillis();
+//        result = aggregation.aggregate(inMemList);
+//        LOG.info("In-memory Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
+//
+//        LOG.info("Starting multithreaded aggregation");
+//        int docCount = (int) BENCHMARK_COLLECTION.count();
+//        int threadCount = 10;
+//        final int limit = Double.valueOf(Math.ceil(((double) docCount) / threadCount)).intValue();
+//        final CountDownLatch latch = new CountDownLatch(docCount);
+//        startTime = System.currentTimeMillis();
+//        for (int i = 0; i < threadCount; i++) {
+//            final int batchId = i;
+//            new Thread() {
+//                @Override
+//                public void run() {
+//                    runAggregation(latch, aggregation, limit, batchId);
+//                }
+//            }.start();
+//        }
+//        latch.await();
+//        LOG.info("Multi-threaded Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
+
         LOG.info("Starting native aggregation");
+        startTime = System.currentTimeMillis();
         List<Map<String, Object>> mongoResults = new ArrayList<>();
-        for (DBObject dbObject : BENCHMARK_COLLECTION.aggregate(
-                Arrays.asList(
-                        new BasicDBObject("$group", new BasicDBObject("_id", "$name").append("groupedIds", new BasicDBObject("$addToSet", "$_id")))
-                )
-        ).results()) {
+        for (DBObject dbObject : new Iterable<DBObject>() {
+            @Override
+            public Iterator<DBObject> iterator() {
+                return BENCHMARK_COLLECTION.aggregate(Arrays.asList(
+                        new BasicDBObject("$group",
+                                new BasicDBObject("_id", null)
+//                                        .append("groupedIds", new BasicDBObject("$addToSet", "$_id"))
+                                        .append("sum", new BasicDBObject("$sum", "$appeal"))
+                                        .append("avg", new BasicDBObject("$avg", "$age"))
+                                        .append("stddev", new BasicDBObject("$stdDevPop", "$age"))
+                                        .append("count", new BasicDBObject("$sum", 1)))
+
+                ), AggregationOptions.builder().allowDiskUse(true).build());
+            }
+        }) {
             mongoResults.add(dbObject.toMap());
         }
         LOG.info("Mongo Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), mongoResults.size());
 
+        LOG.info("Result: " + new Gson().toJson(mongoResults));
 
-        LOG.info("Starting aggregation");
+        LOG.info("Aggregating file");
         startTime = System.currentTimeMillis();
-        result = aggregation.aggregate(inMemList);
-        LOG.info("In-memory Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
+        result = aggregation.aggregate(new JsonFileIterator("C:\\Users\\srira\\Documents\\caffinc\\playarea\\bm.json"));
+        LOG.info("File Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
 
-        int docCount = inMemList.size();
-        int threadCount = 10;
-        final int limit = Double.valueOf(Math.ceil(((double) docCount) / threadCount)).intValue();
-        final AtomicInteger counter = new AtomicInteger(0);
-        LOG.info("Starting multithreaded aggregation");
+        LOG.info("Reading file");
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < threadCount; i++) {
-            final int batchId = i;
-            new Thread() {
-                @Override
-                public void run() {
-                    runAggregation(counter, aggregation, limit, batchId);
+        int count = 0;
+        for (Map<String, Object> obj : new Iterable<Map<String, Object>>() {
+            @Override
+            public Iterator<Map<String, Object>> iterator() {
+                try {
+                    return new JsonFileIterator("C:\\Users\\srira\\Documents\\caffinc\\playarea\\bm.json");
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(e);
                 }
-            }.start();
+            }
+        }) {
+            count = Double.valueOf((double) obj.get("_id")).intValue();
         }
-        while (counter.get() < docCount) {
-            Thread.sleep(1);
-        }
-        LOG.info("Multi-threaded Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());
-
+        LOG.info("File Read time: {}ms {} docs", (System.currentTimeMillis() - startTime), count);
     }
 
-    private static void runAggregation(final AtomicInteger counter, final Aggregation aggregation, final int limit, final int batchId) {
-        LOG.info("Starting aggregation");
+    private static void runAggregation(final CountDownLatch latch, final Aggregation aggregation, final int limit, final int batchId) {
         long startTime = System.currentTimeMillis();
-        List<Map<String, Object>> result = aggregation.aggregate(new Iterator<Map<String, Object>>() {
-            private Iterator<DBObject> objectIterator = BENCHMARK_COLLECTION.find().skip(limit * batchId).limit(limit).iterator();
-
+        List<Map<String, Object>> result = aggregation.aggregate(new JsonIterator<DBObject>(BENCHMARK_COLLECTION.find().skip(limit * batchId).limit(limit)) {
             @Override
-            public boolean hasNext() {
-                return objectIterator.hasNext();
-            }
-
-            @Override
-            public Map<String, Object> next() {
-                counter.incrementAndGet();
-                if (objectIterator.hasNext())
-                    return objectIterator.next().toMap();
-                else
-                    return null;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
+            public Map<String, Object> toJson(DBObject element) {
+                latch.countDown();
+                return element.toMap();
             }
         });
         LOG.info("Aggregation time: {}ms {} docs", (System.currentTimeMillis() - startTime), result.size());

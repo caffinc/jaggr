@@ -3,6 +3,9 @@ package com.caffinc.jaggr.utils;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,7 +17,7 @@ import java.util.NoSuchElementException;
  * @author Sriram
  * @since 11/27/2016
  */
-public class JsonStringIterator implements Iterator<Map<String, Object>>, Closeable {
+public class JsonFileIterator implements Iterator<Map<String, Object>>, Closeable {
     private final BufferedReader bufferedReader;
     private String cachedLine;
     private boolean finished = false;
@@ -26,8 +29,8 @@ public class JsonStringIterator implements Iterator<Map<String, Object>>, Closea
      * @param fileName the <code>fileName</code> to read from
      * @throws IOException thrown if there is a problem accessing the file
      */
-    public JsonStringIterator(final String fileName) throws IOException {
-        this(new BufferedReader(new FileReader(fileName)));
+    public JsonFileIterator(final String fileName) throws IOException {
+        this(Files.newBufferedReader(Paths.get(fileName), Charset.defaultCharset()));
     }
 
     /**
@@ -36,7 +39,7 @@ public class JsonStringIterator implements Iterator<Map<String, Object>>, Closea
      * @param reader the <code>Reader</code> to read from, not null
      * @throws IllegalArgumentException if the reader is null
      */
-    public JsonStringIterator(final Reader reader) throws IllegalArgumentException {
+    public JsonFileIterator(final Reader reader) throws IllegalArgumentException {
         if (reader == null) {
             throw new IllegalArgumentException("Reader must not be null");
         }
@@ -62,15 +65,13 @@ public class JsonStringIterator implements Iterator<Map<String, Object>>, Closea
             return false;
         } else {
             try {
-                while (true) {
-                    final String line = bufferedReader.readLine();
-                    if (line == null) {
-                        finished = true;
-                        return false;
-                    }
-                    cachedLine = line;
-                    return true;
+                final String line = bufferedReader.readLine();
+                if (line == null) {
+                    finished = true;
+                    return false;
                 }
+                cachedLine = line;
+                return true;
             } catch (final IOException ioe) {
                 close();
                 throw new IllegalStateException(ioe);
@@ -126,7 +127,7 @@ public class JsonStringIterator implements Iterator<Map<String, Object>>, Closea
      * @throws UnsupportedOperationException always
      */
     public void remove() {
-        throw new UnsupportedOperationException("Remove unsupported on JsonStringIterator");
+        throw new UnsupportedOperationException("Remove unsupported on JsonFileIterator");
     }
 
 }

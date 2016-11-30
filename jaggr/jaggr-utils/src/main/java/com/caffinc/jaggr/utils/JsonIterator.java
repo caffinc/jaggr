@@ -55,7 +55,7 @@ public abstract class JsonIterator<T> implements Iterator<Map<String, Object>> {
      * @throws UnsupportedOperationException always
      */
     public void remove() {
-        throw new UnsupportedOperationException("Remove unsupported on JsonStringIterator");
+        throw new UnsupportedOperationException("Remove unsupported on JsonFileIterator");
     }
 
 

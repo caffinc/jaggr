@@ -17,7 +17,7 @@ import java.util.Map;
  * @author Sriram
  * @since 11/26/2016
  */
-public class JsonFileReader {
+public class JsonFileUtil {
     private static final Gson gson = new Gson();
 
     /**
@@ -31,7 +31,7 @@ public class JsonFileReader {
         List<Map<String, Object>> jsonList = new ArrayList<>();
         String json;
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(JsonFileReader.class.getClassLoader().getResourceAsStream(resourceName)))) {
+                new InputStreamReader(JsonFileUtil.class.getClassLoader().getResourceAsStream(resourceName)))) {
             while ((json = br.readLine()) != null) {
                 jsonList.add(gson.fromJson(json, HashMap.class));
             }

@@ -12,13 +12,13 @@ jaggr is on Bintray and Maven Central (Soon):
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr</artifactId>
-	    <version>0.4.0</version>
+	    <version>0.5.0</version>
 	</dependency>
 
 	<dependency>
 	    <groupId>com.caffinc</groupId>
 	    <artifactId>jaggr-utils</artifactId>
-	    <version>0.4.0</version>
+	    <version>0.5.0</version>
 	</dependency>
 
 ### Aggregating documents
@@ -162,6 +162,11 @@ However the `getFinalResult()` method must be called just once to get the final 
 5. Average
 6. Collect as List
 7. Collect as Set
+8. First Object
+9. Last Object
+10. Standard Deviation (Population)
+11. Top N Objects
+
 
 ## Tests
 

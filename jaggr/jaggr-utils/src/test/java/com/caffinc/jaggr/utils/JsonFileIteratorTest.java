@@ -12,12 +12,12 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Tests for the JsonStringIterator
+ * Tests for the JsonFileIterator
  *
  * @author Sriram
  * @since 11/27/2016
  */
-public class JsonStringIteratorTest {
+public class JsonFileIteratorTest {
     private static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
     private static final Random RANDOM = new Random();
     private static final Gson GSON = new Gson();
@@ -37,9 +37,9 @@ public class JsonStringIteratorTest {
                     br.write(GSON.toJson(json) + "\n");
                 }
             }
-            try (JsonStringIterator jsonStringIterator = new JsonStringIterator(tempFilePath.toString())) {
+            try (JsonFileIterator jsonFileIterator = new JsonFileIterator(tempFilePath.toString())) {
                 for (Map<String, Object> expected : expectedData) {
-                    Map<String, Object> actual = jsonStringIterator.next();
+                    Map<String, Object> actual = jsonFileIterator.next();
                     Assert.assertEquals("Value should match value written to file", expected, actual);
                 }
             }
