@@ -7,7 +7,7 @@
     <groupId>com.caffinc</groupId>
     <artifactId>jaggr-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <modules>
         <module>jaggr-utils</module>
         <module>jaggr</module>
@@ -41,6 +41,7 @@
     <properties>
         <junit-version>4.12</junit-version>
         <gson-version>2.6.2</gson-version>
+        <apache-commons-math-version>3.6.1</apache-commons-math-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <build>
